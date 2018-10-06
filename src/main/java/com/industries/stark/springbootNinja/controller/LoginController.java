@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.industries.stark.springbootNinja.constant.ViewConstant;
 import com.industries.stark.springbootNinja.model.UserCredential;
 
 @Controller
@@ -18,7 +19,7 @@ public class LoginController {
 	
 	@GetMapping("/")
 	public String redirectToLoing() {
-		LOG.info("===> *** METHOD : redirectToLoing");
+		LOG.info(" --- METHOD : redirectToLoing");
 		return "redirect:/login";
 	}
 	
@@ -26,19 +27,19 @@ public class LoginController {
 	public String showLoginForm(Model model, 
 			@RequestParam(name="error",  required=false) String error,
 			@RequestParam(name="logout", required=false) String logout) {
-		LOG.info("===> *** METHOD : login.  PARAMS : error = "+error+ " , logout = "+logout);
+		LOG.info(" --- METHOD : login.  PARAMS : error = "+error+ " , logout = "+logout);
 		model.addAttribute("userCredentials", new UserCredential());
 		model.addAttribute("error", error);
 		model.addAttribute("logout", logout);
-		return "login";
+		return ViewConstant.LOGIN;
 	}
 	
 	// Return a la vista principal del usuario
 	@PostMapping("/logincheck")
 	public String loginCheck(@ModelAttribute(name="userCredentials") UserCredential userCredential) {
-		LOG.info("===> *** METHOD : loginCheck.  PARAMS : "+userCredential.toString());
+		LOG.info(" --- METHOD : loginCheck.  PARAMS : "+userCredential.toString());
 		if(userCredential.getUsername().equals("user") && userCredential.getPassword().equals("user")) {			
-			return "contacts";
+			return ViewConstant.CONTACTS;
 		}
 		return "redirect:/login?error";
 	}
