@@ -4,6 +4,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +31,8 @@ public class ContactController {
 	@Qualifier("contactServiceImpl")
 	private ContactService contactService;
 	
+	@PreAuthorize("hasRole('ROLE_USER_s')")  // Expresiones Spring, pregunta si el usuario loggeado tiene este rol
+	//@PreAuthorize("permitAll()")   // Se puede usar a nivel metodo o clase, incluso servicio
 	@GetMapping("/contactform")
 	private String redirectContactForm(@RequestParam(name="id", required=true) int id,
 			Model model){ 		
@@ -66,6 +72,18 @@ public class ContactController {
 	public ModelAndView showContacts(){
 		LOG.info(" --- METHOD : /showcontacts. ");
 		ModelAndView mov = new ModelAndView(ViewConstant.CONTACTS);
+		
+		// Validar que user este autenticado, en caso contario se hace redirect a /logout
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if(auth != null && auth.isAuthenticated()){
+			LOG.info(" --- userAuthenticated : "+ auth.getName());
+		}
+		
+		// Obtener el user de session: Obj User de Spring
+		User userSession = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		mov.addObject("username", userSession.getUsername());
+		LOG.info(" --- username / passwd : " +userSession.getUsername() + " / " +userSession.getPassword());
+		
 		mov.addObject("contacts", contactService.listAllContacts());
 		return mov;
 	}
